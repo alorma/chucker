@@ -95,4 +95,31 @@ public class RecordedThrowable {
     public void setContent(String content) {
         this.content = content;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RecordedThrowable that = (RecordedThrowable) o;
+
+        if (_id != null ? !_id.equals(that._id) : that._id != null) return false;
+        if (tag != null ? !tag.equals(that.tag) : that.tag != null) return false;
+        if (date != null ? !date.equals(that.date) : that.date != null) return false;
+        if (clazz != null ? !clazz.equals(that.clazz) : that.clazz != null) return false;
+        if (message != null ? !message.equals(that.message) : that.message != null) return false;
+        return content != null ? content.equals(that.content) : that.content == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = _id != null ? _id.hashCode() : 0;
+        result = 31 * result + (tag != null ? tag.hashCode() : 0);
+        result = 31 * result + (date != null ? date.hashCode() : 0);
+        result = 31 * result + (clazz != null ? clazz.hashCode() : 0);
+        result = 31 * result + (message != null ? message.hashCode() : 0);
+        result = 31 * result + (content != null ? content.hashCode() : 0);
+        return result;
+    }
+
 }

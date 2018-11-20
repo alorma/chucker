@@ -23,9 +23,11 @@ import android.view.ViewGroup;
 
 import com.readystatesoftware.chuck.R;
 import com.readystatesoftware.chuck.internal.data.ChuckContentProvider;
+import com.readystatesoftware.chuck.internal.data.LocalCupboard;
 import com.readystatesoftware.chuck.internal.data.RecordedThrowable;
-import com.readystatesoftware.chuck.internal.support.NotificationHelper;
 import com.readystatesoftware.chuck.internal.support.SQLiteUtils;
+
+import java.util.List;
 
 import static com.readystatesoftware.chuck.internal.data.ChuckContentProvider.LOADER_ERRORS;
 
@@ -124,11 +126,12 @@ public class ErrorListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        adapter.swapCursor(data);
+        data.moveToFirst();
+        List<RecordedThrowable> recordedThrowables = LocalCupboard.getInstance().withCursor(data).list(RecordedThrowable.class);
+        adapter.submitList(recordedThrowables);
     }
 
     @Override
     public void onLoaderReset(@NonNull Loader<Cursor> loader) {
-        adapter.swapCursor(null);
     }
 }
