@@ -27,6 +27,8 @@ import com.readystatesoftware.chuck.internal.data.LocalCupboard;
 import com.readystatesoftware.chuck.internal.data.RecordedThrowable;
 import com.readystatesoftware.chuck.internal.support.SQLiteUtils;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.readystatesoftware.chuck.internal.data.ChuckContentProvider.LOADER_ERRORS;
@@ -36,8 +38,10 @@ import static com.readystatesoftware.chuck.internal.data.ChuckContentProvider.LO
  */
 public class ErrorListFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
 
+    public static final String THROWABLES = "THROWABLES";
     private ErrorAdapter adapter;
     private ErrorAdapter.ErrorListListener listener;
+    private List<RecordedThrowable> recordedThrowables;
 
     public static Fragment newInstance() {
         return new ErrorListFragment();
@@ -78,7 +82,13 @@ public class ErrorListFragment extends Fragment implements LoaderManager.LoaderC
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        getLoaderManager().initLoader(LOADER_ERRORS, null, this);
+        if (savedInstanceState != null) {
+            final RecordedThrowable[] throwables = (RecordedThrowable[]) savedInstanceState.getParcelableArray(THROWABLES);
+            recordedThrowables = new ArrayList<>(Arrays.asList(throwables));
+            adapter.submitList(recordedThrowables);
+        } else {
+            getLoaderManager().initLoader(LOADER_ERRORS, null, this);
+        }
     }
 
     @Override
@@ -98,6 +108,12 @@ public class ErrorListFragment extends Fragment implements LoaderManager.LoaderC
         } else {
             return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArray(THROWABLES, recordedThrowables.toArray(new RecordedThrowable[]{}));
     }
 
     private void askForConfirmation() {
@@ -126,8 +142,7 @@ public class ErrorListFragment extends Fragment implements LoaderManager.LoaderC
 
     @Override
     public void onLoadFinished(@NonNull Loader<Cursor> loader, Cursor data) {
-        data.moveToFirst();
-        List<RecordedThrowable> recordedThrowables = LocalCupboard.getInstance().withCursor(data).list(RecordedThrowable.class);
+        recordedThrowables = new ArrayList<>(LocalCupboard.getInstance().withCursor(data).list(RecordedThrowable.class));
         adapter.submitList(recordedThrowables);
     }
 

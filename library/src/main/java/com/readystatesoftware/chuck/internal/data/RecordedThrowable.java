@@ -1,5 +1,8 @@
 package com.readystatesoftware.chuck.internal.data;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.readystatesoftware.chuck.internal.support.FormatUtils;
 
 import java.util.Date;
@@ -9,7 +12,7 @@ import nl.qbusict.cupboard.annotation.Index;
 /**
  * @author Olivier Perez
  */
-public class RecordedThrowable {
+public class RecordedThrowable implements Parcelable {
 
 
     public static final String[] PARTIAL_PROJECTION = new String[]{
@@ -43,6 +46,16 @@ public class RecordedThrowable {
         clazz = throwable.getClass().getName();
         message = throwable.getMessage();
         content = FormatUtils.formatThrowable(throwable);
+    }
+
+    protected RecordedThrowable(Parcel in) {
+        this._id = (Long) in.readValue(Long.class.getClassLoader());
+        this.tag = in.readString();
+        long tmpDate = in.readLong();
+        this.date = tmpDate == -1 ? null : new Date(tmpDate);
+        this.clazz = in.readString();
+        this.message = in.readString();
+        this.content = in.readString();
     }
 
     public Long getId() {
@@ -122,4 +135,30 @@ public class RecordedThrowable {
         return result;
     }
 
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeValue(this._id);
+        dest.writeString(this.tag);
+        dest.writeLong(this.date != null ? this.date.getTime() : -1);
+        dest.writeString(this.clazz);
+        dest.writeString(this.message);
+        dest.writeString(this.content);
+    }
+
+    public static final Parcelable.Creator<RecordedThrowable> CREATOR = new Parcelable.Creator<RecordedThrowable>() {
+        @Override
+        public RecordedThrowable createFromParcel(Parcel source) {
+            return new RecordedThrowable(source);
+        }
+
+        @Override
+        public RecordedThrowable[] newArray(int size) {
+            return new RecordedThrowable[size];
+        }
+    };
 }
